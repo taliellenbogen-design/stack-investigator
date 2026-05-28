@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stack Investigator</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f0f2f7;
+      --surface:   #ffffff;
+      --surface2:  #f4f6f9;
+      --border:    #e2e8f0;
+      --text:      #1e293b;
+      --muted:     #64748b;
+      --accent:    #2563eb;
+      --accent-h:  #1d4ed8;
+      --high:      #16a34a;
+      --mid:       #d97706;
+      --radius:    10px;
+      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --font:      -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .brand {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .3px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-icon {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      border-radius: 6px;
+      display: grid; place-items: center;
+      font-size: .9rem;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 52px 24px 36px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .hero p {
+      color: var(--muted);
+      font-size: .92rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+
+    /* ── Search form ── */
+    .search-form {
+      display: flex;
+      gap: 8px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .search-form input {
+      flex: 1;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: .95rem;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+      box-shadow: var(--shadow);
+    }
+    .search-form input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+    }
+    .search-form input::placeholder { color: #94a3b8; }
+    .search-form button {
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      cursor: pointer;
+      font-size: .88rem;
+      font-weight: 600;
+      padding: 12px 20px;
+      white-space: nowrap;
+      transition: background .15s;
+      box-shadow: var(--shadow);
+    }
+    .search-form button:hover  { background: var(--accent-h); }
+    .search-form button:disabled { opacity: .5; cursor: not-allowed; }
+
+    .hint {
+      color: #94a3b8;
+      font-size: .76rem;
+      margin-top: 10px;
+    }
+
+    /* ── Loading ── */
+    #loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 56px 24px;
+      text-align: center;
+    }
+    .spinner {
+      width: 34px; height: 34px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-msg { color: var(--muted); font-size: .85rem; }
+
+    /* ── Results ── */
+    #results { display: none; padding: 0 24px 60px; max-width: 1200px; margin: 0 auto; }
+
+    .company-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 28px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .company-logo {
+      width: 44px; height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      object-fit: contain;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+    .company-logo-fallback {
+      width: 44px; height: 44px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      display: grid; place-items: center;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+    }
+    .company-info h2 { font-size: 1.25rem; font-weight: 700; color: var(--text); }
+    .company-info span { color: var(--muted); font-size: .82rem; }
+
+    /* ── Stack grid ── */
+    .stack-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    @media (min-width: 540px) {
+      .stack-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 860px) {
+      .stack-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (min-width: 1100px) {
+      .stack-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+
+    /* ── Category card ── */
+    .cat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .cat-header {
+      padding: 10px 14px;
+      border-bottom: 2px solid var(--accent);
+      font-size: .63rem;
+      font-weight: 800;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--surface2);
+    }
+    .cat-tools {
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .tool-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .tool-logo {
+      width: 28px; height: 28px;
+      border-radius: 5px;
+      object-fit: contain;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .tool-logo-fallback {
+      width: 28px; height: 28px;
+      border-radius: 5px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: grid; place-items: center;
+      font-size: .58rem;
+      font-weight: 700;
+      color: var(--muted);
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .tool-name {
+      font-size: .84rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .tool-confidence {
+      margin-left: auto;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .conf-high   { background: var(--high); }
+    .conf-medium { background: var(--mid); }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 18px;
+      font-size: .74rem;
+      color: var(--muted);
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* ── Error ── */
+    #error-msg {
+      display: none;
+      text-align: center;
+      padding: 32px 24px;
+      color: #dc2626;
+      font-size: .9rem;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--muted);
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: .9rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-icon">🔍</div>
+    Stack Investigator
+  </div>
+</header>
+
+<div class="hero">
+  <h1>Discover any company's tech stack</h1>
+  <p>Enter a company domain and we'll surface the tools they use — from job listings, vendor data, and their own website.</p>
+  <form class="search-form" id="search-form">
+    <input
+      type="text"
+      id="company-input"
+      placeholder="e.g. notion.so, stripe.com, hubspot.com"
+      autocomplete="off"
+      autocapitalize="none"
+      spellcheck="false"
+    />
+    <button type="submit" id="submit-btn">Investigate →</button>
+  </form>
+  <p class="hint">Best results with a domain (e.g. company.com). Company names also work.</p>
+</div>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div id="loading-msg">Scanning website...</div>
+</div>
+
+<div id="error-msg"></div>
+
+<div id="results"></div>
+
+<script>
+  const form      = document.getElementById('search-form');
+  const input     = document.getElementById('company-input');
+  const submitBtn = document.getElementById('submit-btn');
+  const loading   = document.getElementById('loading');
+  const loadingMsg= document.getElementById('loading-msg');
+  const results   = document.getElementById('results');
+  const errorDiv  = document.getElementById('error-msg');
+
+  const LOADING_STEPS = [
+    'Scanning website for tech fingerprints...',
+    'Searching job listings...',
+    'Checking vendor databases...',
+    'Analyzing evidence with AI...',
+    'Almost done...',
+  ];
+
+  function logoUrl(domain) {
+    return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+  }
+
+  function initials(name) {
+    return name.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+  }
+
+  function logoImg(domain, name, cls = 'tool-logo') {
+    const img = document.createElement('img');
+    img.src = logoUrl(domain);
+    img.alt = name;
+    img.className = cls;
+    img.onerror = function () {
+      const fb = document.createElement('div');
+      fb.className = cls + '-fallback';
+      fb.textContent = initials(name);
+      this.replaceWith(fb);
+    };
+    return img;
+  }
+
+  function renderResults(data) {
+    results.innerHTML = '';
+
+    if (!data.stack || data.stack.length === 0) {
+      results.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🔎</div>
+          <p>Not enough public data found for <strong>${data.company_domain || ''}</strong>.<br>
+          Try a larger company or check the domain spelling.</p>
+        </div>`;
+      results.style.display = 'block';
+      return;
+    }
+
+    // Company header
+    const header = document.createElement('div');
+    header.className = 'company-header';
+    const logoEl = logoImg(data.company_domain, data.company_name, 'company-logo');
+    logoEl.onerror = function () {
+      const fb = document.createElement('div');
+      fb.className = 'company-logo-fallback';
+      fb.textContent = initials(data.company_name);
+      this.replaceWith(fb);
+    };
+    const info = document.createElement('div');
+    info.className = 'company-info';
+    info.innerHTML = `<h2>${data.company_name}</h2><span>${data.company_domain}</span>`;
+    header.appendChild(logoEl);
+    header.appendChild(info);
+    results.appendChild(header);
+
+    // Legend
+    const legend = document.createElement('div');
+    legend.className = 'legend';
+    legend.innerHTML = `
+      <span>Confidence:</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--high)"></span> Confirmed by company</span>
+      <span class="legend-item"><span class="legend-dot" style="background:var(--mid)"></span> Reported by 3rd party</span>`;
+    results.appendChild(legend);
+
+    // Grid
+    const grid = document.createElement('div');
+    grid.className = 'stack-grid';
+
+    data.stack.forEach(cat => {
+      const card = document.createElement('div');
+      card.className = 'cat-card';
+
+      const catHeader = document.createElement('div');
+      catHeader.className = 'cat-header';
+      catHeader.textContent = cat.category;
+      card.appendChild(catHeader);
+
+      const toolsDiv = document.createElement('div');
+      toolsDiv.className = 'cat-tools';
+
+      cat.tools.forEach(tool => {
+        const item = document.createElement('div');
+        item.className = 'tool-item';
+
+        item.appendChild(logoImg(tool.domain, tool.name));
+
+        const name = document.createElement('span');
+        name.className = 'tool-name';
+        name.textContent = tool.name;
+        item.appendChild(name);
+
+        const dot = document.createElement('div');
+        dot.className = `tool-confidence conf-${tool.confidence}`;
+        item.appendChild(dot);
+
+        toolsDiv.appendChild(item);
+      });
+
+      card.appendChild(toolsDiv);
+      grid.appendChild(card);
+    });
+
+    results.appendChild(grid);
+    results.style.display = 'block';
+  }
+
+  let loadingInterval;
+
+  function startLoading() {
+    let step = 0;
+    loadingMsg.textContent = LOADING_STEPS[0];
+    loadingInterval = setInterval(() => {
+      step = Math.min(step + 1, LOADING_STEPS.length - 1);
+      loadingMsg.textContent = LOADING_STEPS[step];
+    }, 2200);
+  }
+
+  function stopLoading() {
+    clearInterval(loadingInterval);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const company = input.value.trim();
+    if (!company) return;
+
+    // Reset UI
+    results.style.display = 'none';
+    results.innerHTML = '';
+    errorDiv.style.display = 'none';
+    loading.style.display = 'flex';
+    submitBtn.disabled = true;
+    startLoading();
+
+    try {
+      const res = await fetch('/api/stack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ company }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      renderResults(data);
+    } catch (err) {
+      errorDiv.textContent = `Error: ${err.message}`;
+      errorDiv.style.display = 'block';
+    } finally {
+      stopLoading();
+      loading.style.display = 'none';
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
