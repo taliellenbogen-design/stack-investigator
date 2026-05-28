@@ -351,7 +351,7 @@ STRICT RULES:
 2. Do NOT include a tool just because it appears somewhere in the text. The connection to {company_name} must be clear.
 3. Website scan tools are confirmed — keep them all.
 4. Remove false positives: if the company IS the tool (e.g. Stripe appearing in Stripe's own results), exclude it.
-4b. Do NOT list specific sub-services of major cloud providers as separate tools. If you see AWS Lambda, S3, EC2, EKS — attribute to "AWS". If you see Cloud Run, BigQuery, GKE — attribute to "GCP". If you see Azure Functions, Azure DevOps — attribute to "Azure".
+4b. Do NOT list specific sub-services of major cloud providers as separate tools. If you see AWS Lambda, S3, EC2, EKS, CloudFront, RDS, SQS, SNS, Route53 — attribute to "AWS" only. If you see Cloud Run, BigQuery, GKE, Cloud Storage — attribute to "GCP" only. If you see Azure Functions, Azure DevOps, Azure AD — attribute to "Azure" only.
 5. Categories: CRM | Marketing Automation | Analytics & BI | Sales Engagement | Customer Support | Data Infrastructure | Cloud Infrastructure | DevOps | DevOps & Monitoring | Payments | HR & People | Finance | Procurement & Spend | Security | Collaboration | ABM & Intent | Automation | Design | Other
 6. Confidence: "high" = website scan or explicit job listing requirement. "medium" = vendor/3rd party mention.
 
