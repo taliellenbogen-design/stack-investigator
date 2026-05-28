@@ -24,7 +24,7 @@
     }
 
     body {
-      background: var(--bg);
+      background: linear-gradient(160deg, #eef2ff 0%, #f0f2f7 40%, #f0f2f7 100%);
       color: var(--text);
       font-family: var(--font);
       min-height: 100vh;
@@ -64,7 +64,7 @@
       text-align: center;
     }
     .hero h1 {
-      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
       font-weight: 300;
       letter-spacing: .5px;
       line-height: 1.2;
@@ -76,6 +76,12 @@
       font-size: .92rem;
       line-height: 1.6;
       margin-bottom: 28px;
+    }
+    .hero p .sub {
+      display: block;
+      font-size: .82rem;
+      color: #94a3b8;
+      margin-top: 4px;
     }
 
     /* ── Search form ── */
@@ -122,6 +128,27 @@
       color: #94a3b8;
       font-size: .76rem;
       margin-top: 10px;
+    }
+    .examples {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    .example-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--accent);
+      cursor: pointer;
+      font-size: .76rem;
+      padding: 4px 12px;
+      transition: background .15s, border-color .15s;
+    }
+    .example-chip:hover {
+      background: #eff6ff;
+      border-color: var(--accent);
     }
 
     /* ── Loading ── */
@@ -296,7 +323,7 @@
 
 <div class="hero">
   <h1>Discover any company's tech stack</h1>
-  <p>Enter a company domain and we'll surface the tools they use.<br>From job listings, vendor data, and their own website.</p>
+  <p>Enter a company domain and we'll surface the tools they use.<span class="sub">From job listings, vendor data, and their own website.</span></p>
   <form class="search-form" id="search-form">
     <input
       type="text"
@@ -308,7 +335,12 @@
     />
     <button type="submit" id="submit-btn">Investigate →</button>
   </form>
-  <p class="hint">Best results with a domain (e.g. company.com). Company names also work.</p>
+  <div class="examples">
+    <span class="example-chip" onclick="fillExample('hubspot.com')">hubspot.com</span>
+    <span class="example-chip" onclick="fillExample('monday.com')">monday.com</span>
+    <span class="example-chip" onclick="fillExample('stripe.com')">stripe.com</span>
+    <span class="example-chip" onclick="fillExample('notion.so')">notion.so</span>
+  </div>
 </div>
 
 <div id="loading">
@@ -321,6 +353,11 @@
 <div id="results"></div>
 
 <script>
+  function fillExample(domain) {
+    input.value = domain;
+    input.focus();
+  }
+
   const form      = document.getElementById('search-form');
   const input     = document.getElementById('company-input');
   const submitBtn = document.getElementById('submit-btn');
