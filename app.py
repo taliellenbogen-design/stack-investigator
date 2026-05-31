@@ -350,10 +350,14 @@ STRICT RULES:
 1. From the PUBLIC SOURCES section, only extract a tool if the text clearly connects it to {company_name} — e.g. "{company_name} uses X", "experience with X required", "{company_name} is an X customer/partner", "{company_name} available on X Marketplace", "built on X", "powered by X".
 2. Do NOT include a tool just because it appears somewhere in the text. The connection to {company_name} must be clear.
 3. Website scan tools are confirmed — keep them all.
-4. Remove false positives: if the company IS the tool (e.g. Stripe appearing in Stripe's own results), exclude it.
-4b. Do NOT list specific sub-services of major cloud providers as separate tools. If you see AWS Lambda, S3, EC2, EKS, CloudFront, RDS, SQS, SNS, Route53 — attribute to "AWS" only. If you see Cloud Run, BigQuery, GKE, Cloud Storage — attribute to "GCP" only. If you see Azure Functions, Azure DevOps, Azure AD — attribute to "Azure" only.
-5. Categories: CRM | Marketing Automation | Analytics & BI | Sales Engagement | Customer Support | Data Infrastructure | Cloud Infrastructure | DevOps | DevOps & Monitoring | Payments | HR & People | Finance | Procurement & Spend | Security | Collaboration | ABM & Intent | Automation | Design | Other
-6. Confidence: "high" = website scan or explicit job listing requirement. "medium" = vendor/3rd party mention.
+4. SELF-REFERENCE: Never include {domain} or {company_name} as a tool. If the company IS the product (e.g. Stripe in Stripe's results, HubSpot in HubSpot's results, Cloudflare in Cloudflare's results), exclude it entirely.
+5. CLOUD SUB-SERVICES: Do NOT list sub-services as separate tools. AWS Lambda/S3/EC2/EKS/CloudFront/RDS → "AWS" only. Cloud Run/GKE/Cloud Storage → "GCP" only. Azure Functions/Azure AD/Azure DevOps → "Azure" only.
+6. COMPETITORS: If {company_name} makes a product that competes with a tool, exclude that tool unless evidence is very explicit. Examples: Linear does not use Jira. Datadog does not use New Relic or Splunk. Notion does not use Asana. HubSpot does not use Salesforce as a CRM.
+7. COMPETING PAIRS: Do not list both tools from a competing pair (GitHub vs GitLab, Jira vs Linear vs Asana) unless there is strong explicit evidence for each separately.
+8. NO FRAMEWORKS/LANGUAGES: Do not list programming languages, frontend frameworks (React, Next.js, TypeScript, Vue, Ruby, Node.js, Redux, WebGL) or open-source databases (PostgreSQL, MySQL, Redis) unless the company's product is specifically built around that technology.
+9. TOOL CAP: Return a maximum of 25 tools total. If you find more, keep only the most certain ones.
+10. Categories (use ONLY these, no others): CRM | Marketing Automation | Analytics & BI | Sales Engagement | Customer Support | Data Infrastructure | Cloud Infrastructure | DevOps & Monitoring | Payments | HR & People | Finance | Procurement & Spend | Security | Collaboration | ABM & Intent | Automation | Design | Internal Tools
+11. Confidence: "high" = confirmed by website scan OR explicitly named in a job requirement/case study. "medium" = mentioned in a vendor/3rd party source. Never assign "high" to more than half the tools in a scan.
 
 Return ONLY valid JSON:
 {{
