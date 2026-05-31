@@ -347,7 +347,8 @@ def synthesize(company_name, domain, website_tools, tavily_text):
 {tavily_text[:14000] if tavily_text else "No data"}
 
 STRICT RULES:
-1. From the PUBLIC SOURCES section, only extract a tool if the text clearly connects it to {company_name} — e.g. "{company_name} uses X", "experience with X required", "{company_name} is an X customer/partner", "{company_name} available on X Marketplace", "built on X", "powered by X".
+1. From the PUBLIC SOURCES section, only extract a tool if the text clearly connects it to {company_name} — e.g. "{company_name} uses X", "experience with X required", "{company_name} is an X customer/partner", "built on X", "powered by X".
+   CRITICAL: "{company_name} integrates with X" or "{company_name} + X integration" means their CUSTOMERS can connect the two tools — NOT that {company_name} itself uses X internally. Do NOT include tools found only on integration/partnership pages.
 2. Do NOT include a tool just because it appears somewhere in the text. The connection to {company_name} must be clear.
 3. Website scan tools are confirmed — keep them all.
 4. SELF-REFERENCE: Never include {domain} or {company_name} as a tool. If the company IS the product (e.g. Stripe in Stripe's results, HubSpot in HubSpot's results, Cloudflare in Cloudflare's results), exclude it entirely.
