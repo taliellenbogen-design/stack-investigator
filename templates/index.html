@@ -136,19 +136,36 @@
       flex-wrap: wrap;
       margin-top: 14px;
     }
+    .examples-label {
+      font-size: .72rem;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      letter-spacing: .4px;
+      text-transform: uppercase;
+    }
     .example-chip {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      color: var(--accent);
+      border-radius: 8px;
+      color: var(--text);
       cursor: pointer;
-      font-size: .76rem;
-      padding: 4px 12px;
-      transition: background .15s, border-color .15s;
+      font-size: .8rem;
+      font-weight: 500;
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      box-shadow: var(--shadow);
+      transition: background .15s, border-color .15s, box-shadow .15s;
     }
     .example-chip:hover {
-      background: #eff6ff;
+      background: #f8faff;
       border-color: var(--accent);
+      box-shadow: 0 2px 8px rgba(37,99,235,.1);
+    }
+    .example-chip img {
+      width: 16px; height: 16px;
+      border-radius: 3px;
     }
 
     /* ── Loading ── */
@@ -374,6 +391,26 @@
     />
     <button type="submit" id="submit-btn">Investigate →</button>
   </form>
+  <div style="margin-top:22px;">
+    <div class="examples-label">Try these examples</div>
+    <div class="examples">
+      <div class="example-chip" onclick="fillAndSubmit('monday.com')">
+        <img src="https://www.google.com/s2/favicons?domain=monday.com&sz=32" alt="">monday.com
+      </div>
+      <div class="example-chip" onclick="fillAndSubmit('notion.so')">
+        <img src="https://www.google.com/s2/favicons?domain=notion.so&sz=32" alt="">notion.so
+      </div>
+      <div class="example-chip" onclick="fillAndSubmit('asana.com')">
+        <img src="https://www.google.com/s2/favicons?domain=asana.com&sz=32" alt="">asana.com
+      </div>
+      <div class="example-chip" onclick="fillAndSubmit('loom.com')">
+        <img src="https://www.google.com/s2/favicons?domain=loom.com&sz=32" alt="">loom.com
+      </div>
+      <div class="example-chip" onclick="fillAndSubmit('linear.app')">
+        <img src="https://www.google.com/s2/favicons?domain=linear.app&sz=32" alt="">linear.app
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="loading">
@@ -389,6 +426,11 @@
   function fillExample(domain) {
     input.value = domain;
     input.focus();
+  }
+
+  function fillAndSubmit(domain) {
+    input.value = domain;
+    form.dispatchEvent(new Event('submit'));
   }
 
   const form      = document.getElementById('search-form');
