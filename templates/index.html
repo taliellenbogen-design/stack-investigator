@@ -156,19 +156,58 @@
       display: none;
       flex-direction: column;
       align-items: center;
-      gap: 14px;
+      gap: 24px;
       padding: 56px 24px;
-      text-align: center;
     }
-    .spinner {
-      width: 34px; height: 34px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 100%;
+      max-width: 280px;
+    }
+    .loading-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: .84rem;
+      color: #94a3b8;
+      transition: color .3s;
+    }
+    .loading-step.active { color: var(--text); }
+    .loading-step.done   { color: var(--high); }
+    .step-dot {
+      width: 8px; height: 8px;
       border-radius: 50%;
-      animation: spin .8s linear infinite;
+      background: var(--border);
+      flex-shrink: 0;
+      transition: background .3s;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    #loading-msg { color: var(--muted); font-size: .85rem; }
+    .loading-step.active .step-dot {
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+      animation: pulse-dot 1.2s ease-in-out infinite;
+    }
+    .loading-step.done .step-dot { background: var(--high); }
+    @keyframes pulse-dot {
+      0%, 100% { box-shadow: 0 0 0 3px rgba(37,99,235,.15); }
+      50%       { box-shadow: 0 0 0 6px rgba(37,99,235,.08); }
+    }
+    .loading-bar-wrap {
+      width: 100%;
+      max-width: 280px;
+      height: 3px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .loading-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 99px;
+      transition: width .6s ease;
+    }
 
     /* ── Results ── */
     #results { display: none; padding: 0 24px 60px; max-width: 1200px; margin: 0 auto; }
@@ -338,8 +377,8 @@
 </div>
 
 <div id="loading">
-  <div class="spinner"></div>
-  <div id="loading-msg">Scanning website...</div>
+  <div class="loading-bar-wrap"><div class="loading-bar" id="loading-bar"></div></div>
+  <div class="loading-steps" id="loading-steps"></div>
 </div>
 
 <div id="error-msg"></div>
@@ -361,11 +400,11 @@
   const errorDiv  = document.getElementById('error-msg');
 
   const LOADING_STEPS = [
-    'Scanning website for tech fingerprints...',
-    'Searching job listings...',
-    'Checking vendor databases...',
-    'Analyzing evidence with AI...',
-    'Almost done...',
+    'Scanning website',
+    'Searching job listings',
+    'Checking vendor databases',
+    'Analyzing with AI',
+    'Building results',
   ];
 
   function logoUrl(domain) {
@@ -473,18 +512,42 @@
   }
 
   let loadingInterval;
+  const loadingBar   = document.getElementById('loading-bar');
+  const loadingSteps = document.getElementById('loading-steps');
+
+  function buildSteps() {
+    loadingSteps.innerHTML = '';
+    LOADING_STEPS.forEach((label, i) => {
+      const row = document.createElement('div');
+      row.className = 'loading-step';
+      row.id = `step-${i}`;
+      row.innerHTML = `<div class="step-dot"></div><span>${label}</span>`;
+      loadingSteps.appendChild(row);
+    });
+  }
+
+  function setStep(i) {
+    LOADING_STEPS.forEach((_, idx) => {
+      const el = document.getElementById(`step-${idx}`);
+      el.className = 'loading-step' + (idx < i ? ' done' : idx === i ? ' active' : '');
+    });
+    const pct = Math.round((i / (LOADING_STEPS.length - 1)) * 88);
+    loadingBar.style.width = pct + '%';
+  }
 
   function startLoading() {
+    buildSteps();
     let step = 0;
-    loadingMsg.textContent = LOADING_STEPS[0];
+    setStep(0);
     loadingInterval = setInterval(() => {
       step = Math.min(step + 1, LOADING_STEPS.length - 1);
-      loadingMsg.textContent = LOADING_STEPS[step];
+      setStep(step);
     }, 2200);
   }
 
   function stopLoading() {
     clearInterval(loadingInterval);
+    loadingBar.style.width = '100%';
   }
 
   form.addEventListener('submit', async (e) => {
